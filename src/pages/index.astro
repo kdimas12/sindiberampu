@@ -1,0 +1,89 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { Image } from "astro:assets";
+import profile from "../assets/profile.jpg";
+
+import { contentfulClient } from "../lib/contentful";
+import type { BlogPost } from "../lib/contentful";
+
+const entries = await contentfulClient.getEntries<BlogPost>({
+  content_type: "blogPost",
+  limit: 3,
+});
+
+const posts = entries.items.map((item) => {
+  const { title, date, description, slug } = item.fields;
+
+  // get tags from metadata
+  const tags = item.metadata.tags.map((tag) => `#${tag.sys.id}`).join(", ");
+
+  return {
+    title,
+    slug,
+    description,
+    date: new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
+    tags,
+  };
+});
+---
+
+<Layout title="Sindi W. Berampu">
+  <section class="mb-8 pt-4">
+    <div class="flex flex-col-reverse items-start sm:flex-row gap-8">
+      <div>
+        <p class="text-gray-600">Hi there 👋, I'm</p>
+        <h1
+          class="font-bold text-text-heading text-4xl md:text-5xl pb-2 overflow-hidden"
+        >
+          <span
+            class="bg-gradient-to-bl bg-no-repeat bg-bottom bg-[length:100%_40%]
+            from-primary-blue to-primary-blue"
+          >
+            Sindi W. Berampu
+          </span>
+        </h1>
+        <p class="mt-2 text-gray-600">
+          A writer and world explorer who loves to share experiences and
+          thoughts through <a href="/blog" rel="noopener noreferrer">write</a>.
+          Have a good read!
+        </p>
+      </div>
+      <Image
+        src={profile}
+        alt="sindi profile"
+        loading="eager"
+        class="w-[200px] h-[200px] rounded-md"
+      />
+    </div>
+  </section>
+  <section class="mb-8">
+    <h2 class="text-text-heading text-2xl font-bold border-b py-4">Writing</h2>
+    {
+      posts.map((post) => (
+        <>
+          <div class="border-b py-2">
+            <div>
+              <span class="text-sm font-light text-gray-600">{post.date}</span>
+            </div>
+
+            <div>
+              <a
+                href={`/blog/${post.slug}/`}
+                class="text-xl font-bold text-gray-700"
+                tabindex="0"
+                role="link"
+              >
+                {post.title}
+              </a>
+            </div>
+            <span class="text-sm font-light text-gray-600">{post.tags}</span>
+          </div>
+        </>
+      ))
+    }
+  </section>
+</Layout>

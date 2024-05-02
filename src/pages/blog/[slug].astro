@@ -1,0 +1,60 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { Image } from "astro:assets";
+
+import { contentfulClient } from "../../lib/contentful";
+import { documentToHtmlString } from "@contentful/rich-text-html-renderer";
+import { BLOCKS } from "@contentful/rich-text-types";
+import type { BlogPost } from "../../lib/contentful";
+
+export async function getStaticPaths() {
+  const { items } = await contentfulClient.getEntries<BlogPost>({
+    content_type: "blogPost",
+  });
+
+  const renderOptions = {
+    renderNode: {
+      [BLOCKS.EMBEDDED_ASSET]: (node) => {
+        // use image component to render image
+        return `<Image
+            src=${node.data?.target?.fields?.file?.url}
+            alt=${node.data?.target?.fields?.title}
+            class="mx-auto py-5"
+          />`;
+      },
+    },
+  };
+
+  const pages = items.map((item) => ({
+    params: { slug: item.fields.slug },
+    props: {
+      title: item.fields.title,
+      tags: item.metadata.tags,
+      content: documentToHtmlString(item.fields.content, renderOptions),
+      date: new Date(item.fields.date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+    },
+  }));
+  return pages;
+}
+
+const { content, title, date, tags } = Astro.props;
+---
+
+<Layout title="Sindi W. Berampu">
+  <section class="mb-8 pt-4">
+    <div class="mb-5">
+      <h2 class="text-3xl font-bold text-center">
+        {title}
+      </h2>
+      <p class="text-center">
+        <span class="text-gray-500">{date}</span> -
+        <span>{tags.map((tag) => `#${tag.sys.id}`).join(", ")}</span>
+      </p>
+    </div>
+    <article class="prose whitespace-pre-line" set:html={content} />
+  </section>
+</Layout>

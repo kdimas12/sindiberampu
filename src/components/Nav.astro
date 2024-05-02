@@ -1,0 +1,47 @@
+---
+import Link from "../components/Link.astro";
+import { Icon } from "astro-icon/components";
+---
+
+<header class="">
+  <a
+    class="unset absolute z-10 left-[50%] -top-[100rem] translate-x-[-50%] bg-white text-black px-8 py-2 focus:top-[initial]"
+    href="#main"
+  >
+    Skip to content
+  </a>
+  <nav class="inline">
+    <section class="text-text-bold">
+      <ul class="unset flex gap-4 [&>li]:p-0">
+        <li><Link href="/">Home</Link></li>
+        <li><Link href="/blog">Blog</Link></li>
+      </ul>
+    </section>
+  </nav>
+  <div
+    class="justify-self-end py-2 flex items-center content-center text-text-bold"
+  >
+    <a
+      class="unset ml-4 rounded-sm transition-[background-size] duration-150 bg-left-bottom bg-[length:0%_55%] hover:bg-[length:100%_55%] bg-no-repeat bg-gradient-to-r from-primary-blue to-primary-blue flex items-center gap-1"
+      href="https://www.instagram.com/its_me_kelana_"
+    >
+      <!-- <i
+        class="fa-brands fa-twitter"
+        aria-hidden="true"
+        title="Dinesh on Twitter"></i> -->
+      <Icon name="mdi:instagram" class="text-xl" />
+      <span>Instagram</span>
+    </a>
+  </div>
+</header>
+<style>
+  header {
+    grid-area: header;
+    display: grid;
+    align-items: center;
+    grid-template-columns: minmax(0, 1fr) minmax(0, max-content) minmax(
+        0,
+        max-content
+      );
+  }
+</style>
