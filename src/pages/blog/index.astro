@@ -14,14 +14,13 @@ const entries = await contentfulClient.getEntries<BlogPost>({
 });
 
 const posts = entries.items.map((entry) => {
-  const { title, slug, date, description } = entry.fields;
+  const { title, slug, date } = entry.fields;
 
   const tags = entry.metadata.tags?.map((tag) => tag.sys.id);
 
   return {
     title,
     slug,
-    description,
     date,
     tags,
   };

@@ -11,14 +11,13 @@ const entries = await contentfulClient.getEntries<BlogPost>({
 });
 
 const recentPosts = entries.items.map((entry) => {
-  const { title, slug, date, description } = entry.fields;
+  const { title, slug, date } = entry.fields;
 
   const tags = entry.metadata.tags?.map((tag) => tag.sys.id);
 
   return {
     title,
     slug,
-    description,
     date,
     tags,
   };
@@ -26,7 +25,7 @@ const recentPosts = entries.items.map((entry) => {
 ---
 
 <div class="px-4 md:px-16 flex flex-col gap-4 mt-16">
-  <h3 class="font-medium text-base">Publikasi Terbaru</h3>
+  <h3 class="font-medium text-base">📝 Publikasi Terbaru</h3>
   {
     recentPosts.map((post) => (
       <div class="flex gap-2 justify-between border-b pb-4">
