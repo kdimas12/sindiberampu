@@ -8,6 +8,7 @@ import type { BlogPost } from "../lib/contentful";
 const entries = await contentfulClient.getEntries<BlogPost>({
   content_type: "blogPost",
   limit: 3,
+  order: ["-sys.createdAt"],
 });
 
 const recentPosts = entries.items.map((entry) => {
