@@ -1,0 +1,79 @@
+---
+import Header from "../../components/Header.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import Footer from "../../components/Footer.astro";
+import FormattedDate from "../../components/FormattedDate.astro";
+import TagLink from "../../components/TagLink.astro";
+
+import { contentfulClient } from "../../lib/contentful";
+import type { BlogPost } from "../../lib/contentful";
+
+export async function getStaticPaths() {
+  const { items } = await contentfulClient.getEntries<BlogPost>({
+    content_type: "blogPost",
+  });
+
+  const tags = items.flatMap((item) =>
+    item.metadata.tags.map((tag) => tag.sys.id)
+  );
+
+  const pages = tags.map((tag) => ({
+    params: { slug: tag },
+    props: {
+      tag,
+      posts: items
+        .filter((item) =>
+          item.metadata.tags.map((tag) => tag.sys.id).includes(tag)
+        )
+        .map((item) => ({
+          title: item.fields.title,
+          slug: item.fields.slug,
+          tags: item.metadata.tags.map((tag) => tag.sys.id),
+          date: item.fields.date,
+        })),
+    },
+  }));
+
+  return pages;
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={tag as string}
+      description={(("Posts tagged with " + tag) as string) + "."}
+    />
+  </head>
+  <body
+    class="w-full flex flex-col mx-auto max-w-screen-md min-h-dvh justify-between dark:bg-neutral-800 dark:text-neutral-300 transition-colors duration-300"
+  >
+    <Header />
+    <main class="flex flex-col justify-center px-4 gap-4">
+      <h2 class="w-full font-bold text-black dark:text-white mb-8">
+        🗃️ Publikasi dengan tag <span class="italic"> "{tag}"</span>
+      </h2>
+      {
+        posts.map((post) => (
+          <div class="flex gap-2 justify-between border-b pb-4">
+            <div class="flex flex-col">
+              <FormattedDate date={post.date} />
+              <a class="font-bold text-lg" href={`/blog/${post.slug}`}>
+                {post.title}
+              </a>
+              <div class="flex gap-2">
+                {post.tags?.map((i: string) => {
+                  return <TagLink tag={i} />;
+                })}
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </main>
+    <Footer />
+  </body>
+</html>

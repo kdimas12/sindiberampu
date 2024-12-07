@@ -1,0 +1,59 @@
+---
+import BaseHead from "../../components/BaseHead.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
+
+import { contentfulClient } from "../../lib/contentful";
+import type { BlogPost } from "../../lib/contentful";
+
+const entries = await contentfulClient.getEntries<BlogPost>({
+  content_type: "blogPost",
+});
+
+const posts = entries.items.map((entry) => {
+  const { title, slug, date, description } = entry.fields;
+
+  const tags = entry.metadata.tags?.map((tag) => tag.sys.id);
+
+  return {
+    title,
+    slug,
+    description,
+    date,
+    tags,
+  };
+});
+
+const tags = posts
+  .flatMap((post) => post.tags)
+  .filter((tag, index, self) => self.indexOf(tag) === index);
+---
+
+<!doctype html>
+<html lang="en" class="min-h-screen">
+  <head>
+    <BaseHead title={`Tags - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+  </head>
+  <body
+    class="w-full flex flex-col mx-auto max-w-screen-md min-h-screen justify-between dark:bg-neutral-800 dark:text-neutral-300 transition-colors duration-300"
+  >
+    <Header />
+    <main
+      class="w-full max-w-screen-md mx-auto my-4 flex flex-col gap-4 justify-center px-4"
+    >
+      <ul class="flex flex-wrap gap-2">
+        {
+          tags.map((tag) => (
+            <li>
+              <a href={`/tags/${tag}`} class=" p-1 rounded-md">
+                #{tag}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+    <Footer />
+  </body>
+</html>

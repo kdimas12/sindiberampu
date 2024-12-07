@@ -1,7 +1,10 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import { Image } from "astro:assets";
-import profile from "../assets/profile.jpg";
+import BaseHead from "../../components/BaseHead.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
+import FormattedDate from "../../components/FormattedDate.astro";
+import TagLink from "../../components/TagLink.astro";
 
 import { contentfulClient } from "../../lib/contentful";
 import type { BlogPost } from "../../lib/contentful";
@@ -10,84 +13,79 @@ const entries = await contentfulClient.getEntries<BlogPost>({
   content_type: "blogPost",
 });
 
-const posts = entries.items.map((item) => {
-  const { title, date, description, slug } = item.fields;
+const posts = entries.items.map((entry) => {
+  const { title, slug, date, description } = entry.fields;
 
-  // get tags from metadata
-  const tags = item.metadata.tags.map((tag) => `#${tag.sys.id}`).join(", ");
+  const tags = entry.metadata.tags?.map((tag) => tag.sys.id);
 
   return {
     title,
     slug,
     description,
-    date: new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }),
+    date,
     tags,
   };
 });
+
+// Organize posts by year
+const postByYear = {};
+
+posts.forEach((post) => {
+  const pubDate = new Date(post.date);
+  const year = pubDate.getFullYear();
+  if (!postByYear[year]) {
+    postByYear[year] = [];
+  }
+  postByYear[year].push(post);
+});
 ---
 
-<Layout title="Sindi W. Berampu">
-  <!-- <section class="mb-8 pt-4">
-    <div class="flex flex-col-reverse items-start sm:flex-row gap-8">
-      <div>
-        <p class="text-gray-600">Hi there 👋, I'm</p>
-        <h1
-          class="font-bold text-text-heading text-4xl md:text-5xl pb-2 overflow-hidden"
-        >
-          <span
-            class="bg-gradient-to-bl bg-no-repeat bg-bottom bg-[length:100%_40%]
-            from-primary-blue to-primary-blue"
-          >
-            Sindi W. Berampu
-          </span>
-        </h1>
-        <p class="mt-2 text-gray-600">
-          A writer and world explorer who loves to share experiences and
-          thoughts through <a href="/blog" rel="noopener noreferrer">write</a>.
-          Have a good read!
-        </p>
-      </div>
-      <Image
-        src={profile}
-        alt="sindi profile"
-        loading="eager"
-        class="w-[200px] h-[200px] rounded-md"
-      />
-    </div>
-  </section> -->
-  <section class="mb-8">
-    <!-- <h2 class="text-text-heading text-2xl font-bold border-b py-4">Writing</h2> -->
-    <h1
-      class="font-bold text-text-heading text-4xl md:text-5xl pb-2 overflow-hidden text-center mb-5"
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={`Blog - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+  </head>
+  <body
+    class="w-full mx-auto my-4 max-w-screen-md dark:bg-neutral-800 dark:text-neutral-300 transition-colors duration-300"
+  >
+    <Header />
+    <main
+      class="w-full max-w-screen-md mx-auto my-4 px-4 flex flex-col gap-4 justify-center"
     >
-      All my writings
-    </h1>
-    {
-      posts.map((post) => (
-        <>
-          <div class="border-b py-2">
-            <div>
-              <span class="text-sm font-light text-gray-600">{post.date}</span>
+      {
+        Object.keys(postByYear)
+          .sort((a, b) => parseInt(b) - parseInt(a))
+          .map((year) => (
+            <div class="flex flex-col">
+              <h2 class=" text-black dark:text-white font-bold mb-8">{year}</h2>
+              <div class="flex flex-col gap-4">
+                {postByYear[parseInt(year)].map((post) => (
+                  <div class="flex gap-2 justify-between border-b pb-4">
+                    <div class="flex flex-col">
+                      <FormattedDate date={post.date} />
+                      <a class="font-bold text-lg" href={`/blog/${post.slug}`}>
+                        {post.title}
+                      </a>
+                      <div class="flex gap-2">
+                        {post.tags?.map((i: string) => {
+                          return <TagLink tag={i} />;
+                        })}
+                      </div>
+                    </div>
+                    {/* <a href={`/blog/${post.slug}`}>
+                      <img
+                        src={post.data.heroImage}
+                        alt=""
+                        class="w-40 h-24 bg-contain border border-gray-200"
+                      />
+                    </a> */}
+                  </div>
+                ))}
+              </div>
             </div>
-
-            <div>
-              <a
-                href={`/blog/${post.slug}/`}
-                class="text-xl font-bold text-gray-700"
-                tabindex="0"
-                role="link"
-              >
-                {post.title}
-              </a>
-            </div>
-            <span class="text-sm font-light text-gray-600">{post.tags}</span>
-          </div>
-        </>
-      ))
-    }
-  </section>
-</Layout>
+          ))
+      }
+    </main>
+    <Footer />
+  </body>
+</html>

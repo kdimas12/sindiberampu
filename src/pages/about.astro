@@ -1,0 +1,38 @@
+---
+import Layout from "../layouts/BlogPost.astro";
+import { Image } from "astro:assets";
+import sindiberampu from "../assets/sindiberampu.jpg";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+---
+
+<Layout
+  title={`Tentang Aku - ${SITE_TITLE}`}
+  description="Lorem ipsum dolor sit amet"
+  date={new Date("December 07 2024")}
+>
+  <Image
+    src={sindiberampu}
+    alt="Sindi Berampu"
+    loading="eager"
+    class="rounded-lg mx-auto"
+    width="250"
+    height="250"
+  />
+  <p class="whitespace-normal">
+    Hai, namaku Sindi Berampu juga dikenal sebagai Kaki Kelana. Aku seorang
+    wanita yang gemar menulis. Aku memulai blog ini sebagai wadah untuk
+    menuangkan ide dan pemikiran yang ada di otakku. Semoga tulisan-tulisan yang
+    aku buat bisa bermanfaat bagi pembaca.
+  </p>
+  <h2 class="text-2xl font-bold mt-8">Kontak</h2>
+  <ul>
+    <li>
+      <strong>Email:</strong>
+      <a href="mailto:sindiberampuu@gmai.com">sindiberampuu@gmail.com</a>
+    </li>
+    <li>
+      <strong>Instagram:</strong>
+      <a href="https://www.instagram.com/its_me_kelana_/">berampu</a>
+    </li>
+  </ul>
+</Layout>
